@@ -1,0 +1,40 @@
+services:
+  server:
+    build:
+      context: .
+    volumes:
+      - custom:/kutt/custom
+    environment:
+      DB_CLIENT: mysql2
+      DB_HOST: localhost
+      DB_PORT: 3306
+      REDIS_ENABLED: false
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - 3000:3000
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+  mysql:
+    image: mysql:5.7
+    restart: always
+    volumes:
+      - db_data_mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    expose:
+      - 3306
+  redis:
+    image: redis:alpine
+    restart: always
+    expose:
+      - 6379
+volumes:
+  db_data_mysql:
+  custom:
