@@ -11,16 +11,6 @@ const supportedDBClients = [
   "mysql2"
 ];
 
-// make sure custom alphabet is not empty
-if (process.env.LINK_CUSTOM_ALPHABET === "") {
-  delete process.env.LINK_CUSTOM_ALPHABET;
-}
-
-// make sure jwt secret is not empty
-if (process.env.JWT_SECRET === "") {
-  delete process.env.JWT_SECRET;
-}
-
 // if is started with the --production argument, then set NODE_ENV to production
 if (process.argv.includes("--production")) {
   process.env.NODE_ENV = "production";
@@ -28,12 +18,12 @@ if (process.argv.includes("--production")) {
 
 const spec = {
   PORT: num({ default: 3000 }),
-  SITE_NAME: str({ example: "Kutt", default: "Kutt" }),
-  DEFAULT_DOMAIN: str({ example: "kutt.it", default: "localhost:3000" }),
+  SITE_NAME: str({ example: "Kutt"}),
+  DEFAULT_DOMAIN: str({ example: "kutt.it"}),
   LINK_LENGTH: num({ default: 6 }),
   LINK_CUSTOM_ALPHABET: str({ default: "abcdefghkmnpqrstuvwxyzABCDEFGHKLMNPQRSTUVWXYZ23456789" }),
   TRUST_PROXY: bool({ default: true }),
-  DB_CLIENT: str({ choices: supportedDBClients, default: "better-sqlite3" }),
+  DB_CLIENT: str({ choices: supportedDBClients }),
   DB_FILENAME: str({ default: "db/data" }),
   DB_HOST: str({ default: "localhost" }),
   DB_PORT: num({ default: 5432 }),
@@ -80,7 +70,7 @@ for (const key in spec) {
   try {
     process.env[key] = readFileSync(process.env[file_key], "utf8").trim();
   } catch {
-    // on error, env_FILE just doesn't get applied.
+    throw new Error(`Failed to read file for env ${key}`);
   }
 }
 

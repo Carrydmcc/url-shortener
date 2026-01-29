@@ -1,18 +1,28 @@
 {
-  "name": "kutt",
+  "name": "url-shortener",
   "version": "3.2.3",
   "description": "Modern URL shortener.",
   "main": "./server/server.js",
+  "config": {
+    "imageRepo": "blshipa/url-shortener",
+    "imageName": "shipa-url-shortener"
+  },
   "scripts": {
     "dev": "node --watch-path=./server --watch-path=./custom server/server.js",
     "start": "node server/server.js --production",
+    "docker:build": "cross-conf-env docker buildx build --platform linux/amd64 . -t $npm_package_config_imageRepo:$npm_package_version -t $npm_package_config_imageRepo:latest --secret id=npmrc,src=$HOME/.npmrc",
+    "docker:run": "npm run docker:clean || true && npm run docker:runHelper",
+    "docker:clean": "cross-conf-env docker rm -f $npm_package_config_imageName",
+    "docker:stop": "cross-conf-env docker stop $(docker ps -a -q --filter ancestor=$npm_package_config_imageRepo:$npm_package_version --format=\"{{.ID}}\")",
+    "docker:publish": "cross-conf-env docker push $npm_package_config_imageRepo:$npm_package_version",
+    "docker:runHelper": "cross-conf-env docker run -p 5535:5535 --env-file .env --name $npm_package_config_imageName $npm_package_config_imageRepo:$npm_package_version",
     "migrate": "knex migrate:latest",
     "migrate:make": "knex migrate:make",
     "docs:build": "cd docs/api && node generate && cd ../.."
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thedevs-network/kutt.git"
+    "url": "git+https://github.com/Carrydmcc/url-shortener.git"
   },
   "keywords": [
     "url-shortener"
@@ -37,7 +47,7 @@
     "express-rate-limit": "7.5.0",
     "express-validator": "6.14.2",
     "geoip-lite": "1.4.10",
-    "hbs": "4.2.0",
+    "hbs": "^4.2.0",
     "helmet": "7.1.0",
     "ioredis": "5.4.2",
     "isbot": "5.1.19",
@@ -45,7 +55,7 @@
     "knex": "3.1.0",
     "ms": "2.1.3",
     "mysql2": "3.12.0",
-    "nanoid": "3.3.8",
+    "nanoid": "^5.1.6",
     "nodemailer": "6.9.16",
     "openid-client": "^5.7.0",
     "passport": "0.7.0",
@@ -68,6 +78,7 @@
     "@types/node": "18.11.9",
     "@types/nodemailer": "6.4.6",
     "@types/pg": "8.11.10",
+    "cross-conf-env": "^1.3.0",
     "redoc": "2.2.0"
   }
 }
